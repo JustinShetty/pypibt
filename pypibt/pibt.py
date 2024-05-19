@@ -25,22 +25,29 @@ class PIBT:
 
     def funcPIBT(self, Q_from: Config, Q_to: Config, i: int) -> bool:
         # true -> valid, false -> invalid
+        print(f"funcPIBT({i})")
 
         # get candidate next vertices
         C = [Q_from[i]] + get_neighbors(self.grid, Q_from[i])
         self.rng.shuffle(C)  # tie-breaking, randomize
         C = sorted(C, key=lambda u: self.dist_tables[i].get(u))
 
+        print(i, Q_from[i], C)
+
         # vertex assignment
         for v in C:
+            print(i, v)
+
             # avoid vertex collision
             if self.occupied_nxt[v] != self.NIL:
+                print(i, "vertex collision")
                 continue
 
             j = self.occupied_now[v]
 
-            # avoid edge collision
-            if j != self.NIL and Q_to[j] == Q_from[i]:
+            # avoid following conflict
+            if j != self.NIL and j != i:
+                print(i, "following conflict")
                 continue
 
             # reserve next location
@@ -75,6 +82,7 @@ class PIBT:
         for i in A:
             if Q_to[i] == self.NIL_COORD:
                 self.funcPIBT(Q_from, Q_to, i)
+                print()
 
         # cleanup
         for q_from, q_to in zip(Q_from, Q_to):
