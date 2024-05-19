@@ -118,9 +118,13 @@ def validate_mapf_solution(
     ), "invalid solution, check starts"
 
     # goals
-    assert all(
-        [u == v for (u, v) in zip(goals, solution[-1])]
-    ), "invalid solution, check goals"
+    for i, goal in enumerate(goals):
+        assert (
+            goal == solution[-1][i]
+        ), f"invalid solution, check goals {goal} vs {solution[-1][i]} for {i}"
+    # assert all(
+    #     [u == v for (u, v) in zip(goals, solution[-1])]
+    # ), "invalid solution, check goals"
 
     T = len(solution)
     N = len(starts)
