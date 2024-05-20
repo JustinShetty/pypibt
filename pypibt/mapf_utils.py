@@ -113,18 +113,16 @@ def validate_mapf_solution(
     solution: Configs,
 ) -> None:
     # starts
-    assert all(
-        [u == v for (u, v) in zip(starts, solution[0])]
-    ), "invalid solution, check starts"
+    for i, start in enumerate(starts):
+        assert (
+            start == solution[0][i]
+        ), f"invalid solution, real start {start} vs produce {solution[0][i]} for agent{i}"
 
     # goals
     for i, goal in enumerate(goals):
         assert (
             goal == solution[-1][i]
-        ), f"invalid solution, check goals {goal} vs {solution[-1][i]} for {i}"
-    # assert all(
-    #     [u == v for (u, v) in zip(goals, solution[-1])]
-    # ), "invalid solution, check goals"
+        ), f"invalid solution, real goal {goal} vs produced {solution[-1][i]} for agent{i}"
 
     T = len(solution)
     N = len(starts)
