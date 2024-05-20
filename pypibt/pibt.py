@@ -23,12 +23,18 @@ class PIBT:
         # used for tie-breaking
         self.rng = np.random.default_rng(seed)
 
-    def funcPIBT(self, Q_from: Config, Q_to: Config, i: int, j: int) -> bool:
+    def funcPIBT(
+        self,
+        Q_from: Config,
+        Q_to: Config,
+        i: int,
+        j: list[int],
+    ) -> bool:
         # true -> valid, false -> invalid
-        print(f"funcPIBT({i}, {j if j != self.NIL else 'NIL'})")
+        print(f"funcPIBT({i}, {j[-1] if j[-1] != self.NIL else 'NIL'})")
 
         # get candidate next vertices
-        C = [Q_from[i]] if j == self.NIL else []
+        C = [Q_from[i]] if j[-1] == self.NIL else []
         C += get_neighbors(self.grid, Q_from[i])
         self.rng.shuffle(C)  # tie-breaking, randomize
         C = sorted(C, key=lambda u: self.dist_tables[i].get(u))
@@ -41,11 +47,11 @@ class PIBT:
 
             # avoid vertex collision
             if self.occupied_nxt[v] != self.NIL:
-                print(i, "vertex collision")
+                print(i, f"vertex collision {self.occupied_nxt[v]}")
                 continue
 
             k = self.occupied_now[v]
-            if k != self.NIL and k == j:
+            if k != self.NIL and k == j[-1]:
                 print(i, "avoid deadlock")
                 continue
             if k == self.NIL:
@@ -54,15 +60,17 @@ class PIBT:
                 Q_to[i] = v
                 self.occupied_nxt[v] = i
                 return True
-            if k != self.NIL and k != i:
-                print(i, "try priority inheritance")
-                if self.funcPIBT(Q_from, Q_to, k, i):
+            if k != self.NIL and k != i and Q_to[k] == self.NIL_COORD and k not in j:
+                print(i, "try priority inheritance", k)
+                Q_to[i] = Q_from[i]
+                self.occupied_nxt[Q_from[i]] = i
+                if self.funcPIBT(Q_from, Q_to, k, j + [i]):
                     print(i, "priority inheritance success")
-                    # priority inheritance
-                    Q_to[i] = Q_from[i]
-                    self.occupied_nxt[Q_from[i]] = i
                     return True
+                Q_to[i] = self.NIL_COORD
+                self.occupied_nxt[Q_from[i]] = self.NIL
                 print(i, "priority inheritance failed")
+                continue
 
             Q_to[i] = v
             self.occupied_nxt[v] = i
@@ -83,16 +91,23 @@ class PIBT:
 
         # perform PIBT
         A = sorted(list(range(N)), key=lambda i: priorities[i], reverse=True)
-        print(Q_from)
         for i in A:
             if Q_to[i] == self.NIL_COORD:
-                self.funcPIBT(Q_from, Q_to, i, self.NIL)
-        print()
+                self.funcPIBT(Q_from, Q_to, i, [self.NIL])
 
         # cleanup
         for q_from, q_to in zip(Q_from, Q_to):
             self.occupied_now[q_from] = self.NIL
             self.occupied_nxt[q_to] = self.NIL
+
+        assert np.all(self.occupied_now == self.NIL)
+        if not np.all(self.occupied_nxt == self.NIL):
+            with np.printoptions(threshold=np.inf):
+                print(self.occupied_nxt)
+            print(Q_from)
+            print(Q_to)
+            print(priorities)
+            assert False
 
         return Q_to
 
@@ -106,7 +121,9 @@ class PIBT:
         configs = [self.starts]
         while len(configs) <= max_timestep:
             # obtain new configuration
+            print(f"t={len(configs)-1}")
             Q = self.step(configs[-1], priorities)
+            print()
             configs.append(Q)
 
             # update priorities & goal check

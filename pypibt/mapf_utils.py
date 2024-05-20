@@ -141,7 +141,9 @@ def validate_mapf_solution(
             for j in range(i + 1, N):
                 v_j_now = solution[t][j]
                 v_j_pre = solution[max(t - 1, 0)][j]
-                assert not (v_i_now == v_j_now), "invalid solution, vertex collision"
+                assert not (
+                    v_i_now == v_j_now
+                ), f"invalid solution, vertex collision {i} {v_i_now} vs {j} {v_j_now} @ {t}"
                 assert not (
                     v_i_now == v_j_pre and v_i_pre == v_j_now
                 ), "invalid solution, edge collision"
