@@ -23,9 +23,9 @@ class PIBT:
         # used for tie-breaking
         self.rng = np.random.default_rng(seed)
 
-    def funcPIBT(self, Q_from: Config, Q_to: Config, i: int) -> bool:
+    def funcPIBT(self, Q_from: Config, Q_to: Config, i: int, j: int) -> bool:
         # true -> valid, false -> invalid
-        print(f"funcPIBT({i})")
+        print(f"funcPIBT({i}, {j if j != self.NIL else 'NIL'})")
 
         # get candidate next vertices
         C = [Q_from[i]] + get_neighbors(self.grid, Q_from[i])
@@ -43,22 +43,21 @@ class PIBT:
                 print(i, "vertex collision")
                 continue
 
-            j = self.occupied_now[v]
-
-            # avoid following conflict
-            if j != self.NIL and j != i:
-                print(i, "following conflict")
+            # avoid edge collision
+            if j != self.NIL and Q_from[j] == v:
+                print(i, "edge conflict")
                 continue
 
             # reserve next location
             Q_to[i] = v
             self.occupied_nxt[v] = i
 
-            # priority inheritance (j != i due to the second condition)
+            # priority inheritance
+            k = self.occupied_now[v]
             if (
-                j != self.NIL
-                and (Q_to[j] == self.NIL_COORD)
-                and (not self.funcPIBT(Q_from, Q_to, j))
+                k != self.NIL
+                and (Q_to[k] == self.NIL_COORD)
+                and (not self.funcPIBT(Q_from, Q_to, k, i))
             ):
                 continue
 
@@ -81,7 +80,7 @@ class PIBT:
         A = sorted(list(range(N)), key=lambda i: priorities[i], reverse=True)
         for i in A:
             if Q_to[i] == self.NIL_COORD:
-                self.funcPIBT(Q_from, Q_to, i)
+                self.funcPIBT(Q_from, Q_to, i, self.NIL)
                 print()
 
         # cleanup
