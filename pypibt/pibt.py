@@ -23,17 +23,11 @@ class PIBT:
         # used for tie-breaking
         self.rng = np.random.default_rng(seed)
 
-    def funcPIBT(
-        self,
-        Q_from: Config,
-        Q_to: Config,
-        i: int,
-        j: list[int],
-    ) -> bool:
+    def funcPIBT(self, Q_from: Config, Q_to: Config, i: int, j: int) -> bool:
         # true -> valid, false -> invalid
 
         # get candidate next vertices
-        C = [Q_from[i]] if j[-1] == self.NIL else []
+        C = [Q_from[i]] if j == self.NIL else []
         C += get_neighbors(self.grid, Q_from[i])
         self.rng.shuffle(C)  # tie-breaking, randomize
         C = sorted(C, key=lambda u: self.dist_tables[i].get(u))
@@ -47,10 +41,10 @@ class PIBT:
             # avoid following conflict
             k = self.occupied_now[v]
             if k != self.NIL and k != i:
-                if Q_to[k] == self.NIL_COORD and k not in j:
+                if Q_to[k] == self.NIL_COORD and k != j:
                     Q_to[i] = Q_from[i]
                     self.occupied_nxt[Q_from[i]] = i
-                    if self.funcPIBT(Q_from, Q_to, k, j + [i]):
+                    if self.funcPIBT(Q_from, Q_to, k, i):
                         return True
                     Q_to[i] = self.NIL_COORD
                     self.occupied_nxt[Q_from[i]] = self.NIL
@@ -77,7 +71,7 @@ class PIBT:
         A = sorted(list(range(N)), key=lambda i: priorities[i], reverse=True)
         for i in A:
             if Q_to[i] == self.NIL_COORD:
-                self.funcPIBT(Q_from, Q_to, i, [self.NIL])
+                self.funcPIBT(Q_from, Q_to, i, self.NIL)
 
         # cleanup
         for q_from, q_to in zip(Q_from, Q_to):
