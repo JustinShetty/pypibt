@@ -114,15 +114,17 @@ def validate_mapf_solution(
 ) -> None:
     # starts
     for i, start in enumerate(starts):
-        assert (
-            start == solution[0][i]
-        ), f"invalid solution, real start {start} vs produce {solution[0][i]} for agent{i}"
+        assert start == solution[0][i], (
+            f"invalid solution, real start {start} vs "
+            f"produced {solution[0][i]} for agent{i}"
+        )
 
     # goals
     for i, goal in enumerate(goals):
-        assert (
-            goal == solution[-1][i]
-        ), f"invalid solution, real goal {goal} vs produced {solution[-1][i]} for agent{i}"
+        assert goal == solution[-1][i], (
+            f"invalid solution, real goal {goal} vs "
+            f"produced {solution[-1][i]} for agent{i}"
+        )
 
     T = len(solution)
     N = len(starts)
@@ -141,12 +143,10 @@ def validate_mapf_solution(
             for j in range(i + 1, N):
                 v_j_now = solution[t][j]
                 v_j_pre = solution[max(t - 1, 0)][j]
+                assert not (v_i_now == v_j_now), "invalid solution, vertex collision"
                 assert not (
-                    v_i_now == v_j_now
-                ), f"invalid solution, vertex collision {i} {v_i_now} vs {j} {v_j_now} @ {t}"
-                assert not (
-                    v_i_now == v_j_pre and v_i_pre == v_j_now
-                ), "invalid solution, edge collision"
+                    v_i_now == v_j_pre or v_j_now == v_i_pre
+                ), "invalid solution, following collision"
 
 
 def is_valid_mapf_solution(

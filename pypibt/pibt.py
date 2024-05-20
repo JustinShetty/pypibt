@@ -93,15 +93,8 @@ class PIBT:
         for q_from, q_to in zip(Q_from, Q_to):
             self.occupied_now[q_from] = self.NIL
             self.occupied_nxt[q_to] = self.NIL
-
         assert np.all(self.occupied_now == self.NIL)
-        if not np.all(self.occupied_nxt == self.NIL):
-            with np.printoptions(threshold=np.inf):
-                print(self.occupied_nxt)
-            print(Q_from)
-            print(Q_to)
-            print(priorities)
-            assert False
+        assert np.all(self.occupied_nxt == self.NIL)
 
         return Q_to
 
