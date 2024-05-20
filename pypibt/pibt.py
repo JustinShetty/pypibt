@@ -50,28 +50,22 @@ class PIBT:
                 print(i, f"vertex collision {self.occupied_nxt[v]}")
                 continue
 
+            # avoid following conflict
             k = self.occupied_now[v]
-            if k != self.NIL and k == j[-1]:
-                print(i, "avoid deadlock")
-                continue
-            if k == self.NIL:
-                # reserve next location
-                print(i, "next location not occupied, reserve")
-                Q_to[i] = v
-                self.occupied_nxt[v] = i
-                return True
-            if k != self.NIL and k != i and Q_to[k] == self.NIL_COORD and k not in j:
-                print(i, "try priority inheritance", k)
-                Q_to[i] = Q_from[i]
-                self.occupied_nxt[Q_from[i]] = i
-                if self.funcPIBT(Q_from, Q_to, k, j + [i]):
-                    print(i, "priority inheritance success")
-                    return True
-                Q_to[i] = self.NIL_COORD
-                self.occupied_nxt[Q_from[i]] = self.NIL
-                print(i, "priority inheritance failed")
+            if k != self.NIL and k != i:
+                if Q_to[k] == self.NIL_COORD and k not in j:
+                    print(i, "try priority inheritance", k)
+                    Q_to[i] = Q_from[i]
+                    self.occupied_nxt[Q_from[i]] = i
+                    if self.funcPIBT(Q_from, Q_to, k, j + [i]):
+                        print(i, "priority inheritance success")
+                        return True
+                    Q_to[i] = self.NIL_COORD
+                    self.occupied_nxt[Q_from[i]] = self.NIL
+                    print(i, "priority inheritance failed")
                 continue
 
+            print(i, "reserve next location")
             Q_to[i] = v
             self.occupied_nxt[v] = i
             return True
