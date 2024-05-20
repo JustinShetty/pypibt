@@ -28,7 +28,8 @@ class PIBT:
         print(f"funcPIBT({i}, {j if j != self.NIL else 'NIL'})")
 
         # get candidate next vertices
-        C = [Q_from[i]] + get_neighbors(self.grid, Q_from[i])
+        C = [Q_from[i]] if j == self.NIL else []
+        C += get_neighbors(self.grid, Q_from[i])
         self.rng.shuffle(C)  # tie-breaking, randomize
         C = sorted(C, key=lambda u: self.dist_tables[i].get(u))
 
@@ -43,24 +44,28 @@ class PIBT:
                 print(i, "vertex collision")
                 continue
 
-            # avoid edge collision
-            if j != self.NIL and Q_from[j] == v:
-                print(i, "edge conflict")
+            k = self.occupied_now[v]
+            if k != self.NIL and k == j:
+                print(i, "avoid deadlock")
                 continue
+            if k == self.NIL:
+                # reserve next location
+                print(i, "next location not occupied, reserve")
+                Q_to[i] = v
+                self.occupied_nxt[v] = i
+                return True
+            if k != self.NIL and k != i:
+                print(i, "try priority inheritance")
+                if self.funcPIBT(Q_from, Q_to, k, i):
+                    print(i, "priority inheritance success")
+                    # priority inheritance
+                    Q_to[i] = Q_from[i]
+                    self.occupied_nxt[Q_from[i]] = i
+                    return True
+                print(i, "priority inheritance failed")
 
-            # reserve next location
             Q_to[i] = v
             self.occupied_nxt[v] = i
-
-            # priority inheritance
-            k = self.occupied_now[v]
-            if (
-                k != self.NIL
-                and (Q_to[k] == self.NIL_COORD)
-                and (not self.funcPIBT(Q_from, Q_to, k, i))
-            ):
-                continue
-
             return True
 
         # failed to secure node
@@ -78,10 +83,11 @@ class PIBT:
 
         # perform PIBT
         A = sorted(list(range(N)), key=lambda i: priorities[i], reverse=True)
+        print(Q_from)
         for i in A:
             if Q_to[i] == self.NIL_COORD:
                 self.funcPIBT(Q_from, Q_to, i, self.NIL)
-                print()
+        print()
 
         # cleanup
         for q_from, q_to in zip(Q_from, Q_to):
