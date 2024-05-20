@@ -31,7 +31,6 @@ class PIBT:
         j: list[int],
     ) -> bool:
         # true -> valid, false -> invalid
-        print(f"funcPIBT({i}, {j[-1] if j[-1] != self.NIL else 'NIL'})")
 
         # get candidate next vertices
         C = [Q_from[i]] if j[-1] == self.NIL else []
@@ -39,33 +38,24 @@ class PIBT:
         self.rng.shuffle(C)  # tie-breaking, randomize
         C = sorted(C, key=lambda u: self.dist_tables[i].get(u))
 
-        print(i, Q_from[i], C)
-
         # vertex assignment
         for v in C:
-            print(i, v)
-
             # avoid vertex collision
             if self.occupied_nxt[v] != self.NIL:
-                print(i, f"vertex collision {self.occupied_nxt[v]}")
                 continue
 
             # avoid following conflict
             k = self.occupied_now[v]
             if k != self.NIL and k != i:
                 if Q_to[k] == self.NIL_COORD and k not in j:
-                    print(i, "try priority inheritance", k)
                     Q_to[i] = Q_from[i]
                     self.occupied_nxt[Q_from[i]] = i
                     if self.funcPIBT(Q_from, Q_to, k, j + [i]):
-                        print(i, "priority inheritance success")
                         return True
                     Q_to[i] = self.NIL_COORD
                     self.occupied_nxt[Q_from[i]] = self.NIL
-                    print(i, "priority inheritance failed")
                 continue
 
-            print(i, "reserve next location")
             Q_to[i] = v
             self.occupied_nxt[v] = i
             return True
@@ -108,9 +98,7 @@ class PIBT:
         configs = [self.starts]
         while len(configs) <= max_timestep:
             # obtain new configuration
-            print(f"t={len(configs)-1}")
             Q = self.step(configs[-1], priorities)
-            print()
             configs.append(Q)
 
             # update priorities & goal check
