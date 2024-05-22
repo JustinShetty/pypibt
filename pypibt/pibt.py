@@ -41,7 +41,7 @@ class PIBT:
             # avoid following conflict
             k = self.occupied_now[v]
             if k != self.NIL and k != i:
-                if Q_to[k] == self.NIL_COORD and k != j:
+                if Q_to[k] == self.NIL_COORD:
                     Q_to[i] = Q_from[i]
                     self.occupied_nxt[Q_from[i]] = i
                     if self.funcPIBT(Q_from, Q_to, k, i):
