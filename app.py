@@ -52,7 +52,10 @@ if __name__ == "__main__":
     plan = pibt.run(max_timestep=args.max_timestep)
 
     # validation: True -> feasible solution
-    print(f"solved: {is_valid_mapf_solution(grid, starts, goals, plan)}")
+    print(
+        f"solved: {is_valid_mapf_solution(grid, starts, goals, plan)}, "
+        f"makespan: {len(plan) - 1}"
+    )
 
     # save result
     save_configs_for_visualizer(plan, args.output_file)
