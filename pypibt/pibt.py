@@ -42,10 +42,12 @@ class PIBT:
             k = self.occupied_now[v]
             if k != self.NIL and k != i:
                 if Q_to[k] == self.NIL_COORD:
+                    # Reserve location and try priority inheritance
                     Q_to[i] = Q_from[i]
                     self.occupied_nxt[Q_from[i]] = i
                     if self.funcPIBT(Q_from, Q_to, k, i):
                         return True
+                    # Priority inheritance failed, release location
                     Q_to[i] = self.NIL_COORD
                     self.occupied_nxt[Q_from[i]] = self.NIL
                 continue
