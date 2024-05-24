@@ -27,9 +27,8 @@ class PIBT:
         # true -> valid, false -> invalid
 
         # get candidate next vertices
-        current_vertex = Q_from[i]
-        C = [current_vertex] if j == self.NIL else []
-        C += get_neighbors(self.grid, current_vertex)
+        C = [Q_from[i]] if j == self.NIL else []
+        C += get_neighbors(self.grid, Q_from[i])
         self.rng.shuffle(C)  # tie-breaking, randomize
         C = sorted(C, key=lambda u: self.dist_tables[i].get(u))
 
@@ -43,14 +42,12 @@ class PIBT:
             k = self.occupied_now[v]
             if k != self.NIL and k != i:
                 if Q_to[k] == self.NIL_COORD:
-                    # Reserve location and try priority-inheritance
-                    Q_to[i] = current_vertex
-                    self.occupied_nxt[current_vertex] = i
+                    Q_to[i] = Q_from[i]
+                    self.occupied_nxt[Q_from[i]] = i
                     if self.funcPIBT(Q_from, Q_to, k, i):
                         return True
-                    # Priority inheritance failed, release location
                     Q_to[i] = self.NIL_COORD
-                    self.occupied_nxt[current_vertex] = self.NIL
+                    self.occupied_nxt[Q_from[i]] = self.NIL
                 continue
 
             Q_to[i] = v
@@ -58,8 +55,8 @@ class PIBT:
             return True
 
         # failed to secure node
-        Q_to[i] = current_vertex
-        self.occupied_nxt[current_vertex] = i
+        Q_to[i] = Q_from[i]
+        self.occupied_nxt[Q_from[i]] = i
         return False
 
     def step(self, Q_from: Config, priorities: list[float]) -> Config:
